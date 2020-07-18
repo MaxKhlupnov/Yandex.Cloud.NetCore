@@ -12,10 +12,10 @@ namespace Yandex.Cloud.NetCore.Sample.Common.Framework
 {
     public class MembersManager : IDisposable
     {
-        protected ApplicationContext Context { get; }
+        protected AuthContext Context { get; }
         private bool _disposed;
 
-        public MembersManager(ApplicationContext context)
+        public MembersManager(AuthContext context)
         {
             Context = context;
         }
@@ -27,6 +27,7 @@ namespace Yandex.Cloud.NetCore.Sample.Common.Framework
             {
                 new Claim("phoneNumber", member.PhoneNumber),
                 new Claim("email", member.Email),
+                new Claim("role", member.MemberRole)
             };
 
             return claims;
@@ -38,7 +39,18 @@ namespace Yandex.Cloud.NetCore.Sample.Common.Framework
                 throw new ArgumentException(nameof(login));
 
             return await Context.Members.FirstOrDefaultAsync(
-                u => u.Login == login);
+                u => u.UserName == login);
+        }
+
+        public async Task CreateMemberAsync(Member newMember, string password)
+        {
+            if (string.IsNullOrEmpty(password))
+                throw new ArgumentException(nameof(password));
+
+            newMember.PasswordHash = GeneretePwdHash(password);
+
+            Context.Members.Add(newMember);
+            await Context.SaveChangesAsync();
         }
 
         public bool CheckPassword(Member member, string password)
@@ -47,14 +59,19 @@ namespace Yandex.Cloud.NetCore.Sample.Common.Framework
                 throw new ArgumentException(nameof(password));
 
 
-            var hash = AuthCrypto.GenerateSha256String(password + AuthCrypto.InnerSalt);
-            var success = member.PwdHash.Equals(hash);
+            var hash = GeneretePwdHash(password);
+            var success = member.PasswordHash.Equals(hash);
             if (!success)
             {
-                //todo: add log failed user pass
+                member.AccessFailedCount++;
             }
 
             return success;
+        }
+
+        private string GeneretePwdHash(string password)
+        {
+            return AuthCrypto.GenerateSha256String(password + AuthCrypto.InnerSalt);
         }
 
         public void Save()

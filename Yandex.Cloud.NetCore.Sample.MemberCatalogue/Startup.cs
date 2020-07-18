@@ -33,12 +33,12 @@ namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContextPool<ApplicationContext>(options => options.UseNpgsql(Configuration.GetConnectionString("IdentityServerDb")));
+            services.AddDbContextPool<AuthContext>(options => options.UseNpgsql(Configuration.GetConnectionString("IdentityServerDb")));
             services.AddTransient<MembersManager>(_ =>
-                new MembersManager(new ApplicationContext(new DbContextOptionsBuilder<ApplicationContext>().UseNpgsql(Configuration.GetConnectionString("IdentityServerDb"))
+                new MembersManager(new AuthContext(new DbContextOptionsBuilder<AuthContext>().UseNpgsql(Configuration.GetConnectionString("IdentityServerDb"))
                         .Options)));
 
-            services.AddIdentity<Member, IdentityRole>().AddEntityFrameworkStores<ApplicationContext>()
+            services.AddIdentity<Member, IdentityRole>().AddEntityFrameworkStores<AuthContext>()
                                     .AddDefaultTokenProviders();
 
             // Auto Mapper Configurations
@@ -121,6 +121,7 @@ namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue
             {
                 endpoints.MapControllers();
             });
+
         }
     }
 }

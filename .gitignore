@@ -348,3 +348,5 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+/Yandex.Cloud.NetCore.Sample.Auth/appsettings.Development.json
+/Yandex.Cloud.NetCore.Sample.MemberCatalogue/appsettings.Development.json

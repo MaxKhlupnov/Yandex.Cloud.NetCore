@@ -8,6 +8,7 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
 COPY ["Yandex.Cloud.NetCore.Sample.MemberCatalogue/Yandex.Cloud.NetCore.Sample.MemberCatalogue.csproj", "Yandex.Cloud.NetCore.Sample.MemberCatalogue/"]
+COPY ["Yandex.Cloud.NetCore.Sample.Common/Yandex.Cloud.NetCore.Sample.Common.csproj", "Yandex.Cloud.NetCore.Sample.Common/"]
 RUN dotnet restore "Yandex.Cloud.NetCore.Sample.MemberCatalogue/Yandex.Cloud.NetCore.Sample.MemberCatalogue.csproj"
 COPY . .
 WORKDIR "/src/Yandex.Cloud.NetCore.Sample.MemberCatalogue"

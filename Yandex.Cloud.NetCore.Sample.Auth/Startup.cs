@@ -3,61 +3,54 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using IdentityServer4.EntityFramework.DbContexts;
-using IdentityServer4.EntityFramework.Mappers;
-using Microsoft.EntityFrameworkCore;
-using System.Configuration;
-using Microsoft.Extensions.Configuration;
-using System.Reflection;
+using Yandex.Cloud.NetCore.Sample.Common.Framework;
+using Yandex.Cloud.NetCore.Sample.Common.Models;
 
 namespace Yandex.Cloud.NetCore.Sample.Auth
 {
     public class Startup
     {
-        public IConfiguration Configuration { get; }
-
-        public Startup(Microsoft.Extensions.Hosting.IHostEnvironment env)
+        public Startup(IConfiguration configuration)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", false, true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true)
-                .AddEnvironmentVariables();
-            Configuration = builder.Build();
+            Configuration = configuration;
         }
 
-            // This method gets called by the runtime. Use this method to add services to the container.
-            // For more information on how to configure your application, 
-            // visit https://github.com/IdentityServer/IdentityServer4.Demo
-            public void ConfigureServices(IServiceCollection services)
+        public IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
         {
+
+
+            services.AddDbContextPool<AuthContext>(options => options.UseNpgsql(Configuration.GetConnectionString("IdentityServerDb")));
+            services.AddIdentity<Member, IdentityRole>()
+                                        .AddEntityFrameworkStores<AuthContext>()
+            .AddDefaultTokenProviders();
+
+
+
             services.AddMvc();
-            var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
-            
 
-            services.AddIdentityServer(options =>
-            {
-                options.Events.RaiseErrorEvents = true;
-                options.Events.RaiseFailureEvents = true;
-                options.Events.RaiseInformationEvents = true;
-                options.Events.RaiseSuccessEvents = true;
-            })
-                .AddConfigurationStore(options =>
-            {
-                options.ConfigureDbContext = b => b.UseNpgsql(Configuration.GetConnectionString("IdentityServerDb"), 
-                        sql => sql.MigrationsAssembly(migrationsAssembly));
-            })
-            .AddOperationalStore(options =>
-            {
-                options.ConfigureDbContext = b => b.UseNpgsql(Configuration.GetConnectionString("IdentityServerDb"), 
-                        sql => sql.MigrationsAssembly(migrationsAssembly));
-                options.EnableTokenCleanup = true;
-            });
+            // configure identity server with in-memory stores, keys, clients and scopes
+            services.AddIdentityServer()
+            .AddDeveloperSigningCredential()
+            .AddInMemoryPersistedGrants()
+            .AddInMemoryIdentityResources(Config.GetIdentityResources())
+            .AddInMemoryApiResources(Config.GetApis())
+            .AddInMemoryClients(Config.GetClients())
+             .AddAspNetIdentity<Member>();
 
+
+            services.AddControllersWithViews();
+            services.AddRazorPages();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -66,22 +59,28 @@ namespace Yandex.Cloud.NetCore.Sample.Auth
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseDatabaseErrorPage();
             }
-
-            app.UseCookiePolicy();
-            app.UseDeveloperExceptionPage();
-
-            app.UseCors("api");
-
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();
+            // not needed, since UseIdentityServer adds the authentication middleware
+            /*app.UseAuthentication();
+            app.UseAuthorization();*/
             app.UseIdentityServer();
-            app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapDefaultControllerRoute();
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
             });
         }
     }

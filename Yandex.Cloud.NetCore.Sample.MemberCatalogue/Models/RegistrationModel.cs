@@ -21,11 +21,6 @@ namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue.Models
         public string FirstName { get; set; }
 
         /// <summary>
-        /// Адрес участника
-        /// </summary>
-        public string Address { get; set; }
-
-        /// <summary>
         /// Номер телефона участника
         /// </summary>
         public string PhoneNumber { get; set; }
@@ -34,5 +29,16 @@ namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue.Models
         /// Email адрес участника
         /// </summary>
         public string Email { get; set; }
+
+        /// <summary>
+        /// Адрес участника
+        /// </summary>
+        public string Address { get; set; }
+
+
+        /// <summary>
+        /// Пароль (только на время регистрации)
+        /// </summary>
+        public string Password { get; set; }
     }
 }

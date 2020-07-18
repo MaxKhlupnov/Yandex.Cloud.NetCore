@@ -5,6 +5,15 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Yandex.Cloud.NetCore.Sample.Common.Models
 {
+    public static class MemberRole
+    {
+        public const string ROLE_ADMIN = "admin";
+        public const string ROLE_MANAGER = "coordinator";
+        public const string ROLE_CONTRIBUTOR = "contributor";
+        public const string ROLE_MEMBER = "member";
+    }
+
+
     /**
      * Информация об участнике
      */
@@ -46,28 +55,8 @@ namespace Yandex.Cloud.NetCore.Sample.Common.Models
         public string Email { get; set; }
 
         /// <summary>
-        /// Login
-        /// </summary>
-        public string Login { get; set; }
-
-        /// <summary>
         /// Код проверки первичной регистрации
         /// </summary>
         public int VerificationCode { get; set; }
-
-        /// <summary>
-        /// Password Хэш
-        /// </summary>
-        public string PwdHash { get; set; }
-
-        /// <summary>
-        /// Признак пройденной верификации проверочного кода
-        /// </summary>
-        public bool IsVerified { get; set; }
-
-        /// <summary>
-        /// Признак пройденной регистрации
-        /// </summary>
-        public bool IsRegistered { get; set; }
     }
 }
