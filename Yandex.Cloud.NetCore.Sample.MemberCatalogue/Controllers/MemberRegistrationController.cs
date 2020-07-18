@@ -13,7 +13,7 @@ using Yandex.Cloud.NetCore.Sample.Common.Framework;
 
 namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue.Controllers
 {
-    public class MemberRegistrationController : ControllerBase
+    public class MemberCatalogController : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly ApplicationContext _context;
@@ -22,7 +22,7 @@ namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue.Controllers
         /// <summary>
         /// Первичная верификация и регистрация клиента
         /// </summary>
-        public MemberRegistrationController(IMapper mapper, ApplicationContext context, MembersManager membersManager)
+        public MemberCatalogController(IMapper mapper, ApplicationContext context, MembersManager membersManager)
         {
             this._mapper = mapper;
             this._context = context;
@@ -30,25 +30,33 @@ namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue.Controllers
         }
 
         /// <summary>
-        /// Verify user communication (send email, sms)
+        /// Register member and return verification code (verification send email, sms)
         /// </summary>
-        [Route("createLogin")]
+        [Route("Register")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<string>> GetVerificationCode([FromBody] CommunicationVeryfyModel verifyCommunicationModel)
+        public async Task<ActionResult<string>> Register([FromBody] RegistrationModel registrationModel)
         {
             var generator = new Random();
             var verificationCode = generator.Next(1000, 9999);
             var sessionToken = AuthCrypto.GetConnectionToken();
-            var newMember = _mapper.Map<Member>(verifyCommunicationModel);
-            newMember.Login = verifyCommunicationModel.PhoneNumber != null ? verifyCommunicationModel.PhoneNumber : verifyCommunicationModel.Email;
+            var newMember = _mapper.Map<Member>(registrationModel);
+            newMember.Login =  registrationModel.PhoneNumber != null ?  registrationModel.PhoneNumber :  registrationModel.Email;
             newMember.VerificationCode = verificationCode;
 
-            var existingMember = _membersManager.FindMemberAsync(verifyCommunicationModel.PhoneNumber);
+            var existingMember = _membersManager.FindMemberAsync( registrationModel.PhoneNumber).Result;
 
-            return Ok(sessionToken);
+            if (existingMember != null)
+            {
+                if (!string.Equals(existingMember.Email, registrationModel.Email, StringComparison.OrdinalIgnoreCase))
+                {
+                    return BadRequest(new { result = "email адрес не совпадает с введенным ранее" });
+                }
+
+            }
+                return Ok(sessionToken);
         }
 
 

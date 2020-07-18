@@ -10,9 +10,10 @@ using Yandex.Cloud.NetCore.Sample.Common.Security;
 
 namespace Yandex.Cloud.NetCore.Sample.Common.Framework
 {
-    public class MembersManager
+    public class MembersManager : IDisposable
     {
         protected ApplicationContext Context { get; }
+        private bool _disposed;
 
         public MembersManager(ApplicationContext context)
         {
@@ -56,5 +57,16 @@ namespace Yandex.Cloud.NetCore.Sample.Common.Framework
             return success;
         }
 
+        public void Save()
+        {
+            Context.SaveChanges();
+        }
+
+        public void Dispose()
+        {
+             Context.Dispose();
+        }
+
+        
     }
 }

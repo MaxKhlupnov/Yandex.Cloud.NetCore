@@ -8,8 +8,23 @@ namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue.Models
     /// <summary>
     /// Модель проверки средств связи пользователя
     /// </summary>
-    public class CommunicationVeryfyModel
+    public class RegistrationModel
     {
+        /// <summary>
+        /// Фамилия участника
+        /// </summary>
+        public string LastName { get; set; }
+
+        /// <summary>
+        /// Имя участника
+        /// </summary>
+        public string FirstName { get; set; }
+
+        /// <summary>
+        /// Адрес участника
+        /// </summary>
+        public string Address { get; set; }
+
         /// <summary>
         /// Номер телефона участника
         /// </summary>

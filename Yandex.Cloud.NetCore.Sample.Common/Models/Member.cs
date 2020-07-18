@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.AspNetCore.Identity;
 
 namespace Yandex.Cloud.NetCore.Sample.Common.Models
 {
     /**
      * Информация об участнике
      */
-    public class Member
+    public class Member : IdentityUser
     {
         /// <summary>
         /// ID участника
@@ -30,9 +31,9 @@ namespace Yandex.Cloud.NetCore.Sample.Common.Models
         public string Address { get; set; }
 
         /// <summary>
-        /// Тип участника - "Волонтер" или "Нуждающийся в помощи"
+        /// Роль участника - "Администратор","Координатор","Волонтер","Участник"
         /// </summary>
-        public short MemberType { get; set; }
+        public string MemberRole { get; set; }
 
         /// <summary>
         /// Номер телефона участника

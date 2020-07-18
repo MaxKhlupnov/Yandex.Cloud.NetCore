@@ -11,7 +11,7 @@ namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue
 
         public MappingProfile()
         {
-            CreateMap<CommunicationVeryfyModel, Member>();
+            CreateMap<RegistrationModel, Member>();
         }
     }
 }

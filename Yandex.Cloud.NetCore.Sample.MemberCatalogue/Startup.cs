@@ -11,11 +11,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Swashbuckle.AspNetCore.Swagger;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
-using Yandex.Cloud.NetCore.Sample.Common.Framework;
 using Microsoft.EntityFrameworkCore;
+using Yandex.Cloud.NetCore.Sample.Common.Framework;
+using Yandex.Cloud.NetCore.Sample.Common.Models;
 
 namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue
 {
@@ -35,6 +37,9 @@ namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue
             services.AddTransient<MembersManager>(_ =>
                 new MembersManager(new ApplicationContext(new DbContextOptionsBuilder<ApplicationContext>().UseNpgsql(Configuration.GetConnectionString("IdentityServerDb"))
                         .Options)));
+
+            services.AddIdentity<Member, IdentityRole>().AddEntityFrameworkStores<ApplicationContext>()
+                                    .AddDefaultTokenProviders();
 
             // Auto Mapper Configurations
             var mappingConfig = new MapperConfiguration(mc =>
