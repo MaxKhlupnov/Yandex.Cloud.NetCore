@@ -1,0 +1,22 @@
+version: '3.4'
+
+services:
+  yandex.cloud.netcore.sample.auth:
+    image: ${DOCKER_REGISTRY-}yandexcloudnetcoresampleauth
+    ports:
+      - "5002:80"
+      - "5043:443"
+    build:
+      context: .
+      dockerfile: Yandex.Cloud.NetCore.Sample.Auth/Dockerfile
+
+  yandex.cloud.netcore.sample.membercatalogue:
+    image: ${DOCKER_REGISTRY-}yandexcloudnetcoresamplemembercatalogue
+    ports:
+      - "6002:80"
+      - "6043:443"
+    build:
+      context: .
+      dockerfile: Yandex.Cloud.NetCore.Sample.MemberCatalogue/Dockerfile
+    links:
+    - yandex.cloud.netcore.sample.auth
