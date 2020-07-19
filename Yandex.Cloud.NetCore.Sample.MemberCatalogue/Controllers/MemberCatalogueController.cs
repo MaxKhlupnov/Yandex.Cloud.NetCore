@@ -19,7 +19,6 @@ namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue.Controllers
     {
         private readonly IMapper _mapper;
         private readonly SignInManager<Member> _context;
-        private readonly MembersManager _membersManager;
         private readonly UserManager<Member> userManager;
 
         /// <summary>
