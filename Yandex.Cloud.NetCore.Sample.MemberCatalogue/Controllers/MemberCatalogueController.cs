@@ -47,7 +47,7 @@ namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue.Controllers
             var verificationCode = generator.Next(1000, 9999);
             var sessionToken = AuthCrypto.GetConnectionToken();
             var newMember = _mapper.Map<Member>(registrationModel);
-            newMember.UserName = registrationModel.PhoneNumber != null ? registrationModel.PhoneNumber : registrationModel.Email;
+            newMember.UserName = registrationModel.Email;
             newMember.VerificationCode = verificationCode;
 
             var existingMember = await userManager.FindByNameAsync(newMember.UserName);
