@@ -18,18 +18,18 @@ namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue.Controllers
     public class MemberCatalogController : ControllerBase
     {
         private readonly IMapper _mapper;
-        private readonly AuthContext _context;
+        private readonly SignInManager<Member> _context;
         private readonly MembersManager _membersManager;
         private readonly UserManager<Member> userManager;
 
         /// <summary>
         /// Первичная верификация и регистрация клиента
         /// </summary>
-        public MemberCatalogController(IMapper mapper, AuthContext context, MembersManager membersManager, UserManager<Member> userManager)
+        public MemberCatalogController(IMapper mapper, SignInManager<Member> signInManager,  UserManager<Member> userManager)
         {
             this._mapper = mapper;
-            this._context = context;
-            this._membersManager = membersManager;
+            this._context = signInManager;
+            this.userManager = userManager;
         }
 
         /// <summary>
@@ -50,7 +50,8 @@ namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue.Controllers
             newMember.UserName = registrationModel.PhoneNumber != null ? registrationModel.PhoneNumber : registrationModel.Email;
             newMember.VerificationCode = verificationCode;
 
-            var existingMember = _membersManager.FindMemberAsync(registrationModel.PhoneNumber).Result;
+            var existingMember = await userManager.FindByNameAsync(newMember.UserName);
+                
 
             if (existingMember != null)
             {
@@ -58,7 +59,7 @@ namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue.Controllers
                 {
                     return BadRequest(new { result = "email адрес не совпадает с введенным ранее" });
                 }
-                return BadRequest(new { result = $"пользователь с номером телефона {registrationModel.PhoneNumber} уже зарегистрирован" });
+                return BadRequest(new { result = $"пользователь4 с номером телефона {registrationModel.PhoneNumber} уже зарегистрирован" });
             }
             else
             {
@@ -66,9 +67,10 @@ namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue.Controllers
                 // await user.CreateMemberAsync(newMember, registrationModel.Password);
 
                 var result = await userManager.CreateAsync(newMember, registrationModel.Password);
-                if (result.Succeeded)
+                if (!result.Succeeded)
                 {
-
+                    IdentityError err = result.Errors.First<IdentityError>();
+                    return BadRequest($"{err.Code} {err.Description}");
                 }
                 return Ok(sessionToken);
             }

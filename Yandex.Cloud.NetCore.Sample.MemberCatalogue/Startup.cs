@@ -34,12 +34,12 @@ namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContextPool<AuthContext>(options => options.UseNpgsql(Configuration.GetConnectionString("IdentityServerDb")));
-            services.AddTransient<MembersManager>(_ =>
-                new MembersManager(new AuthContext(new DbContextOptionsBuilder<AuthContext>().UseNpgsql(Configuration.GetConnectionString("IdentityServerDb"))
-                        .Options)));
-
-            services.AddIdentity<Member, IdentityRole>().AddEntityFrameworkStores<AuthContext>()
-                                    .AddDefaultTokenProviders();
+            services.AddIdentity<Member, IdentityRole>(options =>
+            {
+                options.SignIn.RequireConfirmedEmail = false;
+                options.SignIn.RequireConfirmedAccount = false;
+            }).AddEntityFrameworkStores<AuthContext>()
+            .AddDefaultTokenProviders();
 
             // Auto Mapper Configurations
             var mappingConfig = new MapperConfiguration(mc =>

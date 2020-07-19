@@ -11,8 +11,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Yandex.Cloud.NetCore.Sample.Common.Framework;
 using Yandex.Cloud.NetCore.Sample.Common.Models;
+using Yandex.Cloud.NetCore.Sample.Auth.Services;
 
 namespace Yandex.Cloud.NetCore.Sample.Auth
 {
@@ -31,11 +33,14 @@ namespace Yandex.Cloud.NetCore.Sample.Auth
 
 
             services.AddDbContextPool<AuthContext>(options => options.UseNpgsql(Configuration.GetConnectionString("IdentityServerDb")));
-            services.AddIdentity<Member, IdentityRole>()
-                                        .AddEntityFrameworkStores<AuthContext>()
+            services.AddIdentity<Member, IdentityRole>(options =>
+            {
+                options.SignIn.RequireConfirmedEmail = false;
+                options.SignIn.RequireConfirmedAccount = false;
+            }).AddEntityFrameworkStores<AuthContext>()
             .AddDefaultTokenProviders();
 
-
+            services.AddTransient<IEmailSender, EmailSender>();
 
             services.AddMvc();
 
