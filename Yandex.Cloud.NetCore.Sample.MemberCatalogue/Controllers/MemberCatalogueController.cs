@@ -18,16 +18,16 @@ namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue.Controllers
     public class MemberCatalogController : ControllerBase
     {
         private readonly IMapper _mapper;
-        private readonly SignInManager<Member> _context;
+        private readonly AuthContext  _context;
         private readonly UserManager<Member> userManager;
 
         /// <summary>
         /// Первичная верификация и регистрация клиента
         /// </summary>
-        public MemberCatalogController(IMapper mapper, SignInManager<Member> signInManager,  UserManager<Member> userManager)
+        public MemberCatalogController(IMapper mapper, AuthContext authContext, UserManager<Member> userManager )
         {
             this._mapper = mapper;
-            this._context = signInManager;
+            this._context = authContext;
             this.userManager = userManager;
         }
 
@@ -50,7 +50,7 @@ namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue.Controllers
             newMember.VerificationCode = verificationCode;
 
             var existingMember = await userManager.FindByNameAsync(newMember.UserName);
-                
+
 
             if (existingMember != null)
             {
@@ -76,5 +76,17 @@ namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue.Controllers
         }
 
 
+       
+        [Route("api/v1/MemberCatalogue/List")]
+        [HttpGet]
+        //[Authorize("Member")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public ActionResult<ICollection<Member>> List()
+        {
+            return this._context.Members.ToList<Member>();
+
+        }
     }
 }

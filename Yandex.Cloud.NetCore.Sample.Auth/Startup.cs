@@ -49,6 +49,7 @@ namespace Yandex.Cloud.NetCore.Sample.Auth
             .AddDeveloperSigningCredential()
             .AddInMemoryPersistedGrants()
             .AddInMemoryIdentityResources(Config.GetIdentityResources())
+            .AddInMemoryApiScopes(Config.GetApiScopes())
             .AddInMemoryApiResources(Config.GetApis())
             .AddInMemoryClients(Config.GetClients())
              .AddAspNetIdentity<Member>();
