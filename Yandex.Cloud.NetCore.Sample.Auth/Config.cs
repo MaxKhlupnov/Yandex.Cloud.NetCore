@@ -4,6 +4,8 @@ using IdentityServer4.Models;
 using System.Linq;
 using System.Threading.Tasks;
 using IdentityServer4;
+using System.Security;
+using System.Security.Claims;
 
 namespace Yandex.Cloud.NetCore.Sample.Auth
 {
@@ -24,11 +26,10 @@ namespace Yandex.Cloud.NetCore.Sample.Auth
             return new List<ApiScope>
             {
                 // backward compat
-                new ApiScope("api"),
+                new ApiScope("MemberCatalogue"),
                 
                 // more formal
-                new ApiScope("api.scope1"),
-                new ApiScope("api.scope2"),
+                new ApiScope("MemberCatalogue.Api"),
                 
                 // scope without a resource
                 new ApiScope("scope2"),
@@ -43,22 +44,13 @@ namespace Yandex.Cloud.NetCore.Sample.Auth
         {
             return new List<ApiResource>
             {
-                new ApiResource("api", "Demo API")
+                new ApiResource("MemberCatalogue.Api")
                 {
                     ApiSecrets = { new Secret("secret".Sha256()) },
 
-                    Scopes = { "api", "api.scope1", "api.scope2" }
-                },
-
-                // PolicyServer demo (audience should match scope)
-                new ApiResource("policyserver.runtime")
-                {
-                    Scopes = { "policyserver.runtime" }
-                },
-                new ApiResource("policyserver.management")
-                {
-                    Scopes = { "policyserver.runtime" }
+                    Scopes = { "MemberCatalogue","MemberCatalogue.Api" }
                 }
+             
             };
         }
 
@@ -66,6 +58,56 @@ namespace Yandex.Cloud.NetCore.Sample.Auth
         {
             return new List<Client>
             {
+                new Client
+                    {
+                        ClientId = "bytheway.api.client",
+                        AllowAccessTokensViaBrowser = false,
+                        AllowOfflineAccess = false,
+                        //AllowedCorsOrigins = 
+                        AllowedGrantTypes = {
+                            "client_credentials",
+                            "internal_service"
+                        },
+                        ClientSecrets =
+                        {
+                            new Secret("secret".Sha256()) //todo:
+                        },
+                        AllowedScopes =
+                        {
+                            IdentityServerConstants.StandardScopes.OpenId,
+                            IdentityServerConstants.StandardScopes.Profile,
+                            "MemberCatalogue","MemberCatalogue.Api"
+                        },
+                        ClientClaimsPrefix = String.Empty
+                        //Claims = {new Claim("permission", "Admin")}
+                    },
+                new Client
+                    {
+                        ClientId = "native",
+                        ClientName = "MemberCatalogue.Api",
+                        AllowedGrantTypes = GrantTypes.Implicit,
+                        RequireClientSecret = false,
+                        RequireConsent = false,
+                        AllowAccessTokensViaBrowser = true,
+                        RedirectUris =
+                        {
+                            "http://localhost:6002/swagger/oauth2-redirect.html"
+
+                        },
+                        PostLogoutRedirectUris =
+                        {
+                            "http://localhost:6002/swagger/oauth2-redirect.html"
+                        },
+                        AllowedScopes =
+                        {
+                            IdentityServerConstants.StandardScopes.OpenId,
+                            IdentityServerConstants.StandardScopes.Profile,
+                            "MemberCatalogue","MemberCatalogue.Api"
+                        },
+                        AllowOfflineAccess = true,
+                        RefreshTokenUsage = TokenUsage.ReUse,
+                        ClientClaimsPrefix = String.Empty
+                    },
                 new Client
                     {
                         ClientId = "mvc",
@@ -86,122 +128,10 @@ namespace Yandex.Cloud.NetCore.Sample.Auth
                         {
                             IdentityServerConstants.StandardScopes.OpenId,
                             IdentityServerConstants.StandardScopes.Profile,
-                            "api1"
+                            "MemberCatalogue","MemberCatalogue.Api"
                         },
                         AllowOfflineAccess = true
                     },
-                // non-interactive
-                new Client
-                {
-                    ClientId = "m2m",
-                    ClientName = "Machine to machine (client credentials)",
-                    ClientSecrets = { new Secret("secret".Sha256()) },
-
-                    AllowedGrantTypes = GrantTypes.ClientCredentials,
-                    AllowedScopes = { "api", "api.scope1", "api.scope2", "scope2", "policyserver.runtime", "policyserver.management" },
-                },
-                new Client
-                {
-                    ClientId = "m2m.short",
-                    ClientName = "Machine to machine with short access token lifetime (client credentials)",
-                    ClientSecrets = { new Secret("secret".Sha256()) },
-
-                    AllowedGrantTypes = GrantTypes.ClientCredentials,
-                    AllowedScopes = { "api", "api.scope1", "api.scope2", "scope2" },
-                    AccessTokenLifetime = 75
-                },
-
-                // interactive
-                new Client
-                {
-                    ClientId = "interactive.confidential",
-                    ClientName = "Interactive client (Code with PKCE)",
-
-                    RedirectUris = { "https://notused" },
-                    PostLogoutRedirectUris = { "https://notused" },
-
-                    ClientSecrets = { new Secret("secret".Sha256()) },
-
-                    AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
-                    AllowedScopes = { "openid", "profile", "email", "api", "api.scope1", "api.scope2", "scope2" },
-
-                    AllowOfflineAccess = true,
-                    RefreshTokenUsage = TokenUsage.ReUse,
-                    RefreshTokenExpiration = TokenExpiration.Sliding
-                },
-                new Client
-                {
-                    ClientId = "interactive.confidential.short",
-                    ClientName = "Interactive client with short token lifetime (Code with PKCE)",
-
-                    RedirectUris = { "https://notused" },
-                    PostLogoutRedirectUris = { "https://notused" },
-
-                    ClientSecrets = { new Secret("secret".Sha256()) },
-                    RequireConsent = false,
-
-                    AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
-                    RequirePkce = true,
-                    AllowedScopes = { "openid", "profile", "email", "api", "api.scope1", "api.scope2", "scope2" },
-
-                    AllowOfflineAccess = true,
-                    RefreshTokenUsage = TokenUsage.ReUse,
-                    RefreshTokenExpiration = TokenExpiration.Sliding,
-
-                    AccessTokenLifetime = 75
-                },
-
-                new Client
-                {
-                    ClientId = "interactive.public",
-                    ClientName = "Interactive client (Code with PKCE)",
-
-                    RedirectUris = { "https://notused" },
-                    PostLogoutRedirectUris = { "https://notused" },
-
-                    RequireClientSecret = false,
-
-                    AllowedGrantTypes = GrantTypes.Code,
-                    AllowedScopes = { "openid", "profile", "email", "api", "api.scope1", "api.scope2", "scope2" },
-
-                    AllowOfflineAccess = true,
-                    RefreshTokenUsage = TokenUsage.OneTimeOnly,
-                    RefreshTokenExpiration = TokenExpiration.Sliding
-                },
-                new Client
-                {
-                    ClientId = "interactive.public.short",
-                    ClientName = "Interactive client with short token lifetime (Code with PKCE)",
-
-                    RedirectUris = { "https://notused" },
-                    PostLogoutRedirectUris = { "https://notused" },
-
-                    RequireClientSecret = false,
-
-                    AllowedGrantTypes = GrantTypes.Code,
-                    AllowedScopes = { "openid", "profile", "email", "api", "api.scope1", "api.scope2", "scope2" },
-
-                    AllowOfflineAccess = true,
-                    RefreshTokenUsage = TokenUsage.OneTimeOnly,
-                    RefreshTokenExpiration = TokenExpiration.Sliding,
-
-                    AccessTokenLifetime = 75
-                },
-
-                new Client
-                {
-                    ClientId = "device",
-                    ClientName = "Device Flow Client",
-
-                    AllowedGrantTypes = GrantTypes.DeviceFlow,
-                    RequireClientSecret = false,
-
-                    AllowOfflineAccess = true,
-                    RefreshTokenUsage = TokenUsage.OneTimeOnly,
-                    RefreshTokenExpiration = TokenExpiration.Sliding,
-
-                    AllowedScopes = { "openid", "profile", "email", "api", "api.scope1", "api.scope2", "scope2" }
-                },
                 
                 // oidc login only
                 new Client
