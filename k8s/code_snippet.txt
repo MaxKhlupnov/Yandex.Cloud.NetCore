@@ -1,0 +1,25 @@
+1) Устанавливаем kubectl - самый простой способ - из оснастки Docker Desktop
+2) Будьте готовы к тому, что нужно обновить версию kubectl (для работы требуется версия не ниже 1.1)
+3) Формируем конфигурацию 
+yc managed-kubernetes cluster get-credentials <k8s_cluster_id> --external
+4) проверка доступности узлов кластера
+kubectl get nodes -o wide
+5) Настраиваем подключение к Yandex Container Registry из кластера
+yc container registry configure-docker
+6) Настройка ingress-controller на базе nginx:
+
+# Add the official stable repository
+helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+
+# Use Helm to deploy an NGINX ingress controller
+helm install po-pu-ti stable/nginx-ingress
+
+# Проверяем, что запустился балансировщик
+kubectl get service -l app=nginx-ingress
+
+# разворачиваем настройки маршрутов
+kubectl apply -f po-pu-ti-ingress.yaml
+
+#разворачиваем сервисы 
+helm install svc-auth ./svc-auth --debug 
+helm install svc-member-catalogue ./svc-member-catalogue --debug 

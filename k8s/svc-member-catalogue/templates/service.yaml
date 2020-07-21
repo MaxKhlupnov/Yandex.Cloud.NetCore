@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "yandexcloudnetcoresamplemembercatalogue.fullname" . }}
+  labels:
+    app: {{ template "yandexcloudnetcoresamplemembercatalogue.name" . }}
+    chart: {{ template "yandexcloudnetcoresamplemembercatalogue.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ template "yandexcloudnetcoresamplemembercatalogue.name" . }}
+    release: {{ .Release.Name }}

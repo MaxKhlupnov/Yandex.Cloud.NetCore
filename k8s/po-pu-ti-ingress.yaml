@@ -1,0 +1,51 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: po-pu-ti-ingress-swagger
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /swagger/$2
+spec:
+  rules:
+  - http:
+      paths:   
+      - backend:
+          serviceName: svc-member-catalogue
+          servicePort: 80
+        path: /swagger(/|$)(.*)    
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: po-pu-ti-ingress-api
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /api/$2
+spec:
+  rules:
+  - http:
+      paths:
+      - backend:
+          serviceName: svc-member-catalogue
+          servicePort: 80
+        path: /api(/|$)(.*)
+---      
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: po-pu-ti-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+  - http:
+      paths:
+      - backend:
+          serviceName: svc-auth
+          servicePort: 80
+        path: /(.*)
+        
