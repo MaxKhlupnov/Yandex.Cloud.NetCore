@@ -32,7 +32,7 @@ namespace Yandex.Cloud.NetCore.Sample.Auth
         {
 
 
-            services.AddDbContextPool<AuthContext>(options => options.UseNpgsql(Configuration.GetConnectionString("IdentityServerDb")));
+            services.AddDbContextPool<AuthContext>(options => options.UseSqlServer(Configuration.GetConnectionString("IdentityServerDb")));
             services.AddIdentity<Member, IdentityRole>(options =>
             {
                 options.SignIn.RequireConfirmedEmail = false;

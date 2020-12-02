@@ -91,12 +91,14 @@ namespace Yandex.Cloud.NetCore.Sample.Auth
                         AllowAccessTokensViaBrowser = true,
                         RedirectUris =
                         {
-                            "http://localhost:6002/swagger/oauth2-redirect.html"
+                            "http://localhost:6002/swagger/oauth2-redirect.html",
+                            "http://84.201.132.128/swagger/oauth2-redirect.html"
 
                         },
                         PostLogoutRedirectUris =
                         {
-                            "http://localhost:6002/swagger/oauth2-redirect.html"
+                            "http://localhost:6002/swagger/oauth2-redirect.html",
+                            "http://84.201.132.128/swagger/oauth2-redirect.html"
                         },
                         AllowedScopes =
                         {

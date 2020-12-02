@@ -40,7 +40,7 @@ namespace Yandex.Cloud.NetCore.Sample.MemberCatalogue
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContextPool<AuthContext>(options => options.UseNpgsql(Configuration.GetConnectionString("IdentityServerDb")));
+            services.AddDbContextPool<AuthContext>(options => options.UseSqlServer(Configuration.GetConnectionString("IdentityServerDb")));
             services.AddIdentity<Member, IdentityRole>(options =>
             {
                 options.SignIn.RequireConfirmedEmail = false;
